@@ -231,38 +231,70 @@ npm run demo-machine
 ## 📁 Estructura del Proyecto
 
 ```
-oauth2-complete-demo/
-├── 📁 authorization-server/     # Servidor de autorización
-│   ├── 📁 controllers/         # Lógica de endpoints
-│   ├── 📁 models/              # Modelos de datos
-│   ├── 📁 middleware/          # Autenticación, validación
-│   ├── 📁 routes/              # Rutas API
-│   ├── 📁 utils/               # JWT, PKCE, seguridad
-│   ├── 📁 scripts/             # Scripts de inicialización
-│   └── server.js              # Servidor principal
-├── 📁 resource-server/         # API de recursos protegidos
-│   ├── 📁 middleware/          # Auth middleware
-│   ├── 📁 routes/              # Recursos protegidos
-│   └── server.js              # Servidor de recursos
-├── 📁 web-client/              # Cliente web tradicional
-│   ├── 📁 public/              # Assets estáticos
-│   └── server.js              # Servidor web
-├── 📁 spa-frontend/            # SPA React moderno
-│   ├── 📁 src/
-│   │   ├── 📁 components/      # Componentes React
-│   │   ├── 📁 pages/           # Páginas de la aplicación
-│   │   ├── 📁 contexts/        # Estado global (Auth)
-│   │   ├── 📁 services/        # Servicios API
-│   │   └── App.jsx            # Componente principal
-│   └── vite.config.js         # Configuración Vite
-├── 📁 mobile-client/           # Cliente móvil (PKCE)
-│   └── demo.js                # Demostración PKCE
-├── 📁 machine-client/          # Cliente máquina-máquina
-│   └── demo.js                # Demostración Client Credentials
-├── 📁 database/                # Scripts y modelos DB
-├── 📁 docs/                    # Documentación adicional
-├── 📄 verify-all.js           # Script de verificación completa
-└── 📄 package.json            # Configuración principal
+OAUTH-2.0/
+├── 📁 authorization-server/ # Servidor de autorización
+│ ├── 📄 package.json
+│ ├── 📄 server.js # Servidor principal
+│ ├── 📁 models/ # Modelos de MongoDB
+│ │ ├── 📄 AuthorizationCode.js
+│ │ └── 📄 Client.js
+│ ├── 📁 routes/ # Endpoints OAuth
+│ │ ├── 📄 auth.js # /authorize
+│ │ └── 📄 token.js # /token
+│ ├── 📁 scripts/ # Scripts de inicialización
+│ │ ├── 📄 addClientCredentials.js
+│ │ ├── 📄 addMachineClient.js
+│ │ ├── 📄 addSpaClient.js
+│ │ ├── 📄 initData.js
+│ │ ├── 📄 reset.js
+│ │ ├── 📄 verifyClients.js
+│ │ └── 📄 verifySecrets.js
+│ └── 📁 utils/ # Utilidades
+│ └── 📄 crypto.js # PKCE utilities
+├── 📁 resource-server/ # API protegida
+│ ├── 📄 package.json
+│ └── 📄 server.js # Servidor de recursos
+├── 📁 web-client/ # Cliente web tradicional
+│ ├── 📄 package.json
+│ ├── 📄 server.js # Servidor Express
+│ └── 📁 public/ # Archivos estáticos
+│ └── 📄 index.html
+├── 📁 spa-frontend/ # SPA React moderno
+│ ├── 📄 package.json
+│ ├── 📄 vite.config.js # Configuración Vite
+│ ├── 📄 index.html # Template HTML
+│ └── 📁 src/ # Código fuente React
+│ ├── 📄 App.jsx # Componente principal
+│ ├── 📄 main.jsx # Punto de entrada
+│ ├── 📄 App.css # Estilos principales
+│ ├── 📄 index.css # Estilos base
+│ ├── 📁 components/ # Componentes reutilizables
+│ │ ├── 📄 LoadingSpinner.jsx
+│ │ └── 📄 Navbar.jsx
+│ ├── 📁 contexts/ # Estado global
+│ │ └── 📄 AuthContext.jsx
+│ ├── 📁 pages/ # Páginas de la aplicación
+│ │ ├── 📄 ApiDemo.jsx
+│ │ ├── 📄 Callback.jsx
+│ │ ├── 📄 Home.jsx
+│ │ └── 📄 Profile.jsx
+│ └── 📁 services/ # Servicios API
+│ └── 📄 authService.js
+├── 📁 mobile-client/ # Cliente móvil (PKCE)
+│ ├── 📄 package.json
+│ └── 📄 demo.js # Demostración PKCE
+├── 📁 machine-client/ # Cliente máquina-máquina
+│ ├── 📄 package.json
+│ └── 📄 demo.js # Demostración Client Credentials
+├── 📁 database/ # Scripts de base de datos
+│ ├── 📄 package.json
+│ └── 📁 scripts/
+│ ├── 📄 init.js # Inicialización BD
+│ └── 📄 reset.js # Reset BD
+├── 📁 docs/ # Documentación
+│ └── 📄 package.json
+├── 📄 verify-all.js # Script de verificación completa
+└── 📄 package.json # Configuración principal
 ```
 
 ## 🌐 Endpoints API
