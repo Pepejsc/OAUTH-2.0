@@ -1,0 +1,40 @@
+{
+  "name": "oauth2-complete-demo",
+  "version": "1.0.0",
+  "description": "Implementación completa de OAuth 2.0 con todos los flujos",
+  "scripts": {
+    "install:all": "npm run install:auth && npm run install:resource && npm run install:web && npm run install:mobile && npm run install:machine",
+    "install:auth": "cd authorization-server && npm install",
+    "install:resource": "cd resource-server && npm install",
+    "install:web": "cd web-client && npm install",
+    "install:mobile": "cd mobile-client && npm install",
+    "install:machine": "cd machine-client && npm install",
+    "dev": "concurrently \"npm run dev:auth\" \"npm run dev:resource\" \"npm run dev:web\"",
+    "dev:auth": "cd authorization-server && npm run dev",
+    "dev:resource": "cd resource-server && npm run dev",
+    "dev:web": "cd web-client && npm run dev",
+    "demo:mobile": "cd mobile-client && npm run demo-pkce",
+    "demo:machine": "cd machine-client && npm run demo-machine",
+    "demo:all": "concurrently \"npm run demo:mobile\" \"npm run demo:machine\"",
+    "db:init": "cd authorization-server && node scripts/initData.js",
+    "db:reset": "cd authorization-server && node ../database/scripts/reset.js",
+    "db:setup": "cd database && node scripts/init.js",
+    "docs:serve": "cd docs && npx serve .",
+    "test:all": "echo \"Ejecutar demos individuales para testing\""
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "keywords": [
+    "oauth2",
+    "authorization",
+    "security",
+    "demo",
+    "authentication"
+  ],
+  "author": "Tu Nombre",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.13.2"
+  }
+}

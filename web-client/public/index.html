@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OAuth 2.0 Web Client Demo</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .subtitle { font-size: 1.2em; opacity: 0.9; margin-bottom: 30px; }
+        .btn {
+            background: #fff;
+            color: #667eea;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        .feature {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 OAuth 2.0 Demo</h1>
+        <p class="subtitle">Implementación completa de flujos de autorización</p>
+        
+        <a href="/login" class="btn">
+            🚀 Iniciar Flujo OAuth
+        </a>
+
+        <div class="features">
+            <div class="feature">
+                <h3>🛡️ Authorization Code</h3>
+                <p>Flujo más seguro para aplicaciones web</p>
+            </div>
+            <div class="feature">
+                <h3>🔑 JWT Tokens</h3>
+                <p>Tokens seguros y verificables</p>
+            </div>
+            <div class="feature">
+                <h3>📊 API Protegida</h3>
+                <p>Recursos protegidos con scopes</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; font-size: 0.9em; opacity: 0.7;">
+            <p>Servicios ejecutándose:</p>
+            <p>• Web Client (3000) • Authorization Server (3001) • Resource Server (3002)</p>
+        </div>
+    </div>
+</body>
+</html>

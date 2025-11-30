@@ -1,0 +1,15 @@
+{
+  "name": "mobile-client",
+  "version": "1.0.0",
+  "description": "OAuth 2.0 Mobile Client with PKCE",
+  "main": "demo.js",
+  "scripts": {
+    "start": "node demo.js",
+    "dev": "nodemon demo.js",
+    "demo-pkce": "node demo.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "crypto": "^1.0.1"
+  }
+}
