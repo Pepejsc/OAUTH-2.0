@@ -31,18 +31,59 @@ Este proyecto implementa **todos los flujos OAuth 2.0** definidos en el RFC 6749
 
 ## 🏗️ Arquitectura
 
+### Diagrama C4 Nivel 2 (Contenedores)
+
 ```mermaid
 graph TB
-    A[Web Client] --> B[Authorization Server]
-    C[Mobile Client] --> B
-    D[Machine Client] --> B
-    B --> E[Resource Server]
-    A --> E
-    C --> E
-    D --> E
+    subgraph "Sistema OAuth 2.0"
+        WC[Web Client<br/>Express.js<br/>Puerto 3000]
+        SPA[SPA Frontend<br/>React/Vite<br/>Puerto 3003]
+        AS[Authorization Server<br/>Express.js + MongoDB<br/>Puerto 3001]
+        RS[Resource Server<br/>Express.js + MongoDB<br/>Puerto 3002]
+        MC[Mobile Client<br/>Node.js<br/>PKCE Demo]
+        MCC[Machine Client<br/>Node.js<br/>Client Credentials]
+        
+        WC --> AS
+        SPA --> AS
+        MC --> AS
+        MCC --> AS
+        
+        WC --> RS
+        SPA --> RS
+        MC --> RS
+        MCC --> RS
+        
+        AS --> DB1[(MongoDB<br/>oauth_demo)]
+        RS --> DB2[(MongoDB<br/>oauth_demo)]
+    end
     
-    B --> F[(Database)]
-    E --> F
+    U1[Usuario Web] --> WC
+    U2[Usuario Móvil] --> MC
+    S1[Servicio Backend] --> MCC
+    U3[Usuario SPA] --> SPA
+```
+
+### Diagrama C4 Nivel 3 (Componentes - Authorization Server)
+
+```mermaid
+graph TB
+    subgraph "Authorization Server - Puerto 3001"
+        A1[Auth Controller<br/>/authorize]
+        A2[Token Controller<br/>/token]
+        A3[Client Service<br/>Gestión de clientes]
+        A4[Code Service<br/>Códigos autorización]
+        A5[Token Service<br/>JWT Tokens]
+        A6[PKCE Service<br/>Validación Code Challenge]
+        
+        A1 --> A3
+        A1 --> A4
+        A2 --> A3
+        A2 --> A4
+        A2 --> A5
+        A2 --> A6
+        A3 --> ADB[(MongoDB<br/>Clients)]
+        A4 --> CDB[(MongoDB<br/>AuthCodes)]
+    end
 ```
 
 ## 🔄 Flujos Implementados
@@ -53,7 +94,6 @@ graph TB
 | **Authorization Code + PKCE** | Público | ✅ | 🔐🔐 | SPAs, móviles, desktop |
 | **Client Credentials** | Confidencial | ✅ | 🔐 | Machine-to-machine |
 | **Refresh Token** | Todos | ✅ | 🔐 | Renovación de tokens |
-| **Resource Owner Password** | Legacy | ✅ | ⚠️ | Migración (no recomendado) |
 
 ## ⚙️ Requisitos
 
@@ -61,7 +101,6 @@ graph TB
 - **Node.js** 18.0 o superior
 - **npm** 9.0 o superior
 - **MongoDB** 5.0 o superior
-- **Redis** 6.0 o superior (opcional, para producción)
 
 ### Dependencias Principales
 - Express.js - Servidores web
@@ -70,13 +109,15 @@ graph TB
 - bcrypt - Hash de contraseñas
 - crypto - Generación PKCE
 - axios - Clientes HTTP
+- React - SPA Frontend
+- Vite - Build tool para React
 
 ## 🚀 Instalación
 
 ### 1. Clonar el Repositorio
 ```bash
-git clone https://github.com/tu-usuario/oauth2-complete-demo.git
-cd oauth2-complete-demo
+git clone https://github.com/Pepejsc/OAUTH-2.0.git
+cd OAUTH-2.0
 ```
 
 ### 2. Instalar Dependencias
@@ -85,28 +126,28 @@ cd oauth2-complete-demo
 npm run install:all
 
 # O individualmente
-cd authorization-server && npm install
-cd ../resource-server && npm install
-cd ../web-client && npm install
-cd ../mobile-client && npm install
-cd ../machine-client && npm install
+npm run install:auth
+npm run install:resource  
+npm run install:web
+npm run install:spa
+npm run install:mobile
+npm run install:machine
 ```
 
 ### 3. Configurar Base de Datos
 ```bash
-# Iniciar MongoDB (macOS con brew)
-brew services start mongodb/brew/mongodb-community
+# Iniciar MongoDB
+mongod --dbpath "C:\data\db"
 
-# O con Docker
-docker run -d -p 27017:27017 --name oauth-mongo mongo:5
+# Inicializar datos
+npm run db:init
 ```
 
 ### 4. Configurar Variables de Entorno
 ```bash
-# Copiar plantillas
+# Copiar plantillas y configurar
 cp .env.example .env
-cp authorization-server/.env.example authorization-server/.env
-cp resource-server/.env.example resource-server/.env
+# Configurar cada servicio según sea necesario
 ```
 
 ## 🔧 Configuración
@@ -120,8 +161,6 @@ PORT=3001
 MONGODB_URI=mongodb://localhost:27017/oauth_demo
 JWT_SECRET=tu_jwt_secret_super_seguro_aqui
 JWT_REFRESH_SECRET=tu_refresh_secret_aqui
-CLIENT_ENCRYPTION_KEY=tu_clave_32_caracteres_aqui
-FRONTEND_URL=http://localhost:3000
 ```
 
 **resource-server/.env**
@@ -130,7 +169,6 @@ NODE_ENV=development
 PORT=3002
 MONGODB_URI=mongodb://localhost:27017/oauth_demo
 JWT_SECRET=tu_jwt_secret_super_seguro_aqui
-AUTH_SERVER_URL=http://localhost:3001
 ```
 
 ### Configuración de Clientes OAuth
@@ -147,33 +185,36 @@ El sistema incluye clientes preconfigurados:
 
 ### 1. Iniciar Todos los Servicios
 ```bash
-# Desarrollo - inicia todos los servicios
+# Desarrollo - inicia servicios principales
 npm run dev
 
 # O individualmente
-npm run start:auth    # Authorization Server (3001)
-npm run start:resource # Resource Server (3002)
-npm run start:web     # Web Client (3000)
-npm run start:mobile  # Mobile Client (3003)
+npm run dev:auth    # Authorization Server (3001)
+npm run dev:resource # Resource Server (3002)
+npm run dev:web     # Web Client (3000)
+npm run dev:spa     # SPA Frontend (3003)
 ```
 
 ### 2. Acceder a las Demostraciones
 
 | Servicio | URL | Descripción |
 |----------|-----|-------------|
-| **Web Client** | http://localhost:3000 | Cliente web completo |
+| **Web Client** | http://localhost:3000 | Cliente web tradicional |
+| **SPA Frontend** | http://localhost:3003 | Aplicación React moderna |
 | **Auth Server** | http://localhost:3001 | Servidor de autorización |
-| **API Docs** | http://localhost:3001/api-docs | Documentación Swagger |
-| **Mobile Demo** | http://localhost:3003 | Cliente móvil simulado |
+| **API Docs** | http://localhost:3001/health | Health checks |
 
-### 3. Probar Flujos
+### 3. Probar Flujos Específicos
 
-#### Flujo Código de Autorización (Web)
+#### Flujo Web Tradicional
 1. Navegar a http://localhost:3000
 2. Click "Login with OAuth"
-3. Completar autenticación (usuario: `demo`, contraseña: `demo`)
-4. Ver consentimiento y autorizar
-5. Redirección automática con tokens
+3. Completar flujo de autorización
+
+#### Flujo SPA Moderno
+1. Navegar a http://localhost:3003
+2. Click "Iniciar Sesión con OAuth 2.0"
+3. Experiencia SPA sin recargas
 
 #### Flujo PKCE (Mobile)
 ```bash
@@ -181,7 +222,7 @@ cd mobile-client
 npm run demo-pkce
 ```
 
-#### Flujo Client Credentials (Máquina)
+#### Flujo Client Credentials
 ```bash
 cd machine-client
 npm run demo-machine
@@ -197,22 +238,31 @@ oauth2-complete-demo/
 │   ├── 📁 middleware/          # Autenticación, validación
 │   ├── 📁 routes/              # Rutas API
 │   ├── 📁 utils/               # JWT, PKCE, seguridad
+│   ├── 📁 scripts/             # Scripts de inicialización
 │   └── server.js              # Servidor principal
 ├── 📁 resource-server/         # API de recursos protegidos
 │   ├── 📁 middleware/          # Auth middleware
 │   ├── 📁 routes/              # Recursos protegidos
 │   └── server.js              # Servidor de recursos
-├── 📁 web-client/              # Cliente web (Confidencial)
+├── 📁 web-client/              # Cliente web tradicional
 │   ├── 📁 public/              # Assets estáticos
-│   ├── 📁 src/                 # Código frontend
 │   └── server.js              # Servidor web
+├── 📁 spa-frontend/            # SPA React moderno
+│   ├── 📁 src/
+│   │   ├── 📁 components/      # Componentes React
+│   │   ├── 📁 pages/           # Páginas de la aplicación
+│   │   ├── 📁 contexts/        # Estado global (Auth)
+│   │   ├── 📁 services/        # Servicios API
+│   │   └── App.jsx            # Componente principal
+│   └── vite.config.js         # Configuración Vite
 ├── 📁 mobile-client/           # Cliente móvil (PKCE)
 │   └── demo.js                # Demostración PKCE
 ├── 📁 machine-client/          # Cliente máquina-máquina
-│   └── demo.js                # Demostración M2M
+│   └── demo.js                # Demostración Client Credentials
 ├── 📁 database/                # Scripts y modelos DB
 ├── 📁 docs/                    # Documentación adicional
-└── 📁 scripts/                 # Scripts de utilidad
+├── 📄 verify-all.js           # Script de verificación completa
+└── 📄 package.json            # Configuración principal
 ```
 
 ## 🌐 Endpoints API
@@ -223,18 +273,17 @@ oauth2-complete-demo/
 |--------|----------|-------------|
 | `GET` | `/authorize` | Iniciar flujo de autorización |
 | `POST` | `/token` | Obtener tokens de acceso |
-| `POST` | `/token/introspect` | Validar token |
-| `POST` | `/token/revoke` | Revocar token |
-| `GET` | `/userinfo` | Información de usuario (OIDC) |
+| `GET` | `/health` | Health check |
 
 ### Resource Server (3002)
 
-| Método | Endpoint | Scope Requerido |
-|--------|----------|-----------------|
-| `GET` | `/api/profile` | `profile` |
-| `GET` | `/api/email` | `email` |
-| `GET` | `/api/orders` | `orders:read` |
-| `POST` | `/api/orders` | `orders:write` |
+| Método | Endpoint | Scope Requerido | Descripción |
+|--------|----------|-----------------|-------------|
+| `GET` | `/api/profile` | `profile` | Perfil de usuario |
+| `GET` | `/api/email` | `email` | Email de usuario |
+| `GET` | `/api/system/status` | `api:read` | Estado del sistema |
+| `GET` | `/api/system/metrics` | `api:read` | Métricas del sistema |
+| `POST` | `/api/system/cleanup` | `api:write` | Tareas de sistema |
 
 ## 🔒 Seguridad
 
@@ -246,16 +295,15 @@ oauth2-complete-demo/
 - ✅ **Scopes y mínimo privilegio**
 - ✅ **Tokens JWT firmados**
 - ✅ **Refresh tokens rotativos**
-- ✅ **CORS configurado correctamente**
 - ✅ **Rate limiting básico**
 - ✅ **Helmet.js para headers de seguridad**
 
 ### Mejores Prácticas Aplicadas
 
 ```javascript
-// Ejemplo: Validación segura de redirect_uri
+// Validación segura de redirect_uri
 function validateRedirectUri(redirectUri, client) {
-  const allowedUris = client.redirect_uris;
+  const allowedUris = client.redirectUris;
   const requestedUri = new URL(redirectUri);
   
   return allowedUris.some(allowed => {
@@ -270,38 +318,30 @@ function validateRedirectUri(redirectUri, client) {
 
 ### 1. Demostración de Flujo Completo
 ```bash
-npm run demo:complete
+# Verificación completa del sistema
+node verify-all.js
 ```
 
-### 2. Demostración de Seguridad PKCE
-```bash
-npm run demo:pkce
-```
+### 2. Comparación de Scopes
+El SPA incluye una demostración interactiva que muestra:
+- Tokens de usuario vs tokens de máquina
+- Protección por scopes en acción
+- Mínimo privilegio en práctica
 
-### 3. Demostración de Ataques y Protecciones
-```bash
-npm run demo:security
-```
+### 3. Casos de Uso Específicos
 
-### 4. Casos de Uso Específicos
-
-#### Integración con Red Social
+#### Integración con SPA
 ```javascript
-// Simulación "Login with Google"
-const googleAuth = {
-  client_id: 'web-client-123',
-  scope: 'profile email',
-  response_type: 'code',
-  redirect_uri: 'http://localhost:3000/callback'
-};
+// Manejo moderno de tokens en frontend
+const { login, logout, token } = useAuth();
 ```
 
 #### API Machine-to-Machine
 ```javascript
 // Servicio a servicio
 const token = await getClientCredentialsToken({
-  client_id: 'service-account-1',
-  client_secret: 'secret-key',
+  client_id: 'machine-client-789',
+  client_secret: 'machine-secret-999',
   scope: 'api:read api:write'
 });
 ```
@@ -314,36 +354,33 @@ const token = await getClientCredentialsToken({
    ```bash
    # Verificar que MongoDB esté ejecutándose
    mongod --version
-   brew services list
+   mongod --dbpath "C:\data\db"
    ```
 
 2. **Puertos ocupados**
    ```bash
    # Ver puertos en uso
-   lsof -i :3000-3005
+   netstat -ano | findstr :3000
    
    # O matar procesos
-   pkill -f node
+   taskkill /f /im node.exe
    ```
 
-3. **Error JWT Secret**
-   ```bash
-   # Generar nuevo secret
-   node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
-   ```
+3. **Error de scopes**
+   - Verificar que el cliente tenga los scopes necesarios
+   - Revisar los scopes del token en jwt.io
 
 ### Comandos de Diagnóstico
 
 ```bash
 # Verificar salud de servicios
-npm run healthcheck
-
-# Ver logs en tiempo real
-npm run logs:auth
-npm run logs:resource
+node verify-all.js
 
 # Resetear base de datos
 npm run db:reset
+
+# Ver logs en tiempo real
+# Revisar consolas de cada servicio
 ```
 
 ## 🤝 Contribución
@@ -361,7 +398,7 @@ npm run db:reset
 - **Código:** Seguir ESLint configuration
 - **Commits:** Conventional commits
 - **Documentación:** Markdown con ejemplos prácticos
-- **Tests:** Jest para unit tests, Supertest para APIs
+- **Tests:** Incluir tests para nuevas funcionalidades
 
 ## 📄 Licencia
 
@@ -373,8 +410,7 @@ Si encuentras problemas o tienes preguntas:
 
 1. 📖 Revisa la documentación en `/docs`
 2. 🐛 Abre un issue en GitHub
-3 💬 Únete a nuestro Discord de discusión
-4. 📧 Contacta al maintainer: tu-email@dominio.com
+3. 🔍 Usa el script de verificación: `node verify-all.js`
 
 ---
 
@@ -383,10 +419,9 @@ Si encuentras problemas o tienes preguntas:
 ¿Listo para comenzar? Sigue estas instrucciones:
 
 1. **Primeros Pasos**: `npm run setup:dev`
-2. **Probar Demo**: `npm run demo:quickstart`  
-3. **Explorar Código**: Revisa `web-client/src/` para ejemplos prácticos
-4. **Modificar**: Experimenta cambiando scopes o flujos
-5. **Aprender**: Usa los ejemplos para entender OAuth 2.0 en profundidad
+2. **Probar Demo**: Navega a http://localhost:3003  
+3. **Explorar Código**: Revisa `spa-frontend/` para el frontend moderno
+4. **Aprender**: Usa las demostraciones para entender OAuth 2.0 en profundidad
 
 **¡Feliz aprendizaje! 🚀**
 
@@ -396,6 +431,6 @@ Si encuentras problemas o tienes preguntas:
 
 *¿Te sirvió este proyecto? ¡Dale una ⭐ en GitHub!*
 
-**¿Preguntas?** Revisa los [issues](https://github.com/tu-usuario/oauth2-complete-demo/issues) o abre uno nuevo.
+**¿Preguntas?** Revisa los [issues](https://github.com/Pepejsc/OAUTH-2.0/issues) o abre uno nuevo.
 
 </div>
